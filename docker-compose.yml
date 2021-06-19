@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  app:
+    restart: always
+    build:
+      context: ./container/php
+      dockerfile: Dockerfile
+    env_file: .env
+#    environment:
+    depends_on:
+      - database
+    networks:
+      - test-app
+    working_dir: /var/www
+    volumes:
+      - .:/var/www:delegated
+      - ./container/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+      - ./var/log/php/:/var/log/
+  nginx:
+    image: nginx:alpine
+    restart: always
+    depends_on:
+      - app
+    networks:
+      - test-app
+    ports:
+      - 6589:80
+    volumes:
+      - .:/var/www
+      - ./container/nginx/conf.d/:/etc/nginx/conf.d/
+      - ./var/log/:/var/log
+  database:
+    image: postgres:13-alpine
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: INWAJ9jn0caTkdjmK118egYydjXZTBz4pmcdKJsrAwU=
+      POSTGRES_USER: user
+      POSTGRES_DB: test
+    networks:
+      - test-app
+    ports:
+      - 5432:5432
+    volumes:
+      - "fs-db:/var/lib/postgresql/data"
+networks:
+  test-app:
+    driver: bridge
+
+volumes:
+  fs-db:
+    driver: local
