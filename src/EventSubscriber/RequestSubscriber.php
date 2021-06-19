@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Event;
+namespace App\EventSubscriber;
 
-use App\Service\Http\RequestLogger;
+use App\Service\Http\Logger\RequestLogger;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\KernelEvent;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
@@ -64,6 +64,6 @@ class RequestSubscriber implements EventSubscriberInterface
      */
     protected function needLog(KernelEvent $event): bool
     {
-        return $event->isMainRequest();
+        return (bool)$event->getRequest()->get('request-log', false);
     }
 }

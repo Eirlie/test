@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Service\Http;
+namespace App\Service\Http\Logger;
 
 use App\Entity\HttpLog;
 use Doctrine\ORM\EntityManagerInterface;
@@ -11,13 +11,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RequestLogger
 {
-    protected $record;
+    protected HttpLog $record;
 
     /**
      * RequestLogger constructor.
      */
-    public function __construct(protected EntityManagerInterface $entityManager)
+    public function __construct(
+        protected EntityManagerInterface $entityManager,
+        protected HttpLogManager $httpLogManager,
+    )
     {
+        $this->record = new HttpLog();
     }
 
     /**
@@ -27,16 +31,7 @@ class RequestLogger
      */
     public function logRequestInfo(Request $request): void
     {
-        $record = $this->getRecord();
-        $record->setIp($request->getClientIp());
-        $record->setUrl($request->getUri());
-        $record->setRequestHeaders($request->headers->all());
-
-        $content = $request->getContent();
-        if (is_string($content)) {
-            $record->setRequest($content);
-        }
-
+        $record = $this->httpLogManager->fillRequestInfo($this->record, $request);
         $this->entityManager->persist($record);
         $this->entityManager->flush();
     }
@@ -48,29 +43,8 @@ class RequestLogger
      */
     public function logResponseInfo(Response $response): void
     {
-        $record = $this->getRecord();
-
-        if ($content = $response->getContent()) {
-            $record->setResponse($content);
-        }
-        $record->setResponseHeaders($response->headers->all());
-        $record->setStatusCode($response->getStatusCode());
-
+        $record = $this->httpLogManager->fillResponseInfo($this->record, $response);
         $this->entityManager->persist($record);
         $this->entityManager->flush();
-    }
-
-    /**
-     * Get current request record
-     *
-     * @return \App\Entity\HttpLog
-     */
-    protected function getRecord(): HttpLog
-    {
-        if (!$this->record) {
-            $this->record = new HttpLog();
-        }
-
-        return $this->record;
     }
 }
