@@ -7,7 +7,12 @@ services:
       context: ./container/php
       dockerfile: Dockerfile
     env_file: .env
-#    environment:
+    environment:
+      DATABASE_USER: 'app'
+      DATABASE_PASSWORD: 'INWAJ9jn0caTkdjmK118egYydjXZTBz4pmcdKJsrAwU='
+      DATABASE_NAME: test
+      DATABASE_PORT: 5432
+      DATABASE_HOST: database
     depends_on:
       - database
     networks:
@@ -34,8 +39,8 @@ services:
     image: postgres:13-alpine
     restart: always
     environment:
-      POSTGRES_PASSWORD: INWAJ9jn0caTkdjmK118egYydjXZTBz4pmcdKJsrAwU=
-      POSTGRES_USER: user
+      POSTGRES_USER: 'app'
+      POSTGRES_PASSWORD: 'INWAJ9jn0caTkdjmK118egYydjXZTBz4pmcdKJsrAwU='
       POSTGRES_DB: test
     networks:
       - test-app
