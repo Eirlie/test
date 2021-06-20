@@ -7,6 +7,7 @@ FROM php:8.0.6-fpm
 WORKDIR /var/www
 
 RUN apt-get update && apt-get install -y \
+        npm \
         build-essential \
         libpng-dev \
         libjpeg62-turbo-dev \
@@ -22,6 +23,7 @@ RUN apt-get update && apt-get install -y \
         libpq-dev
 
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
 
 
 # Install extensions

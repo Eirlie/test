@@ -5,11 +5,30 @@ declare(strict_types=1);
 namespace App\Service\Http\Logger;
 
 use App\Entity\HttpLog;
+use App\Repository\HttpLogRepository;
+use App\Service\Http\Logger\Data\HttpLogFilter;
+use App\Service\View\PaginatedList;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class HttpLogManager
 {
+    /**
+     * HttpLogManager constructor.
+     */
+    public function __construct(protected HttpLogRepository $httpLogRepository)
+    {
+    }
+
+    public function getRequestList(HttpLogFilter $filter = null): PaginatedList
+    {
+        return new PaginatedList(
+            $this->httpLogRepository->findByFiltersCount($filter),
+            $this->httpLogRepository->findByFilters($filter),
+        );
+    }
+
     /**
      * Fill record request information
      *
@@ -22,7 +41,7 @@ class HttpLogManager
     {
         $record->setIp($request->getClientIp());
         $record->setUrl($request->getUri());
-        $record->setRequestHeaders($request->headers->all());
+        $record->setRequestHeaders((string)$request->headers);
 
         $content = $request->getContent();
         if (is_string($content)) {
@@ -45,7 +64,7 @@ class HttpLogManager
         if ($content = $response->getContent()) {
             $record->setResponse($content);
         }
-        $record->setResponseHeaders($response->headers->all());
+        $record->setResponseHeaders((string)$response->headers);
         $record->setStatusCode($response->getStatusCode());
 
         return $record;

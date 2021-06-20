@@ -3,7 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\HttpLog;
+use App\Service\Http\Logger\Data\HttpLogFilter;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -19,32 +22,36 @@ class HttpLogRepository extends ServiceEntityRepository
         parent::__construct($registry, HttpLog::class);
     }
 
-    // /**
-    //  * @return HttpLog[] Returns an array of HttpLog objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function findByFiltersCount(?HttpLogFilter $filter = null): int
     {
-        return $this->createQueryBuilder('h')
-            ->andWhere('h.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('h.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
+        $query = $this->findByFiltersQB($filter)
+            ->select('count(hl.id)')
         ;
+        return $query->getQuery()->getResult(Query::HYDRATE_SINGLE_SCALAR);
     }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?HttpLog
+    public function findByFilters(?HttpLogFilter $filter = null): array
     {
-        return $this->createQueryBuilder('h')
-            ->andWhere('h.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $query = $this->findByFiltersQB($filter)
+            ->orderBy('hl.createdAt', 'DESC');
+        if ($filter) {
+            $itemsPerPage = $filter->getItemsPerPage();
+            $query->setMaxResults($itemsPerPage);
+            $query->setFirstResult(($filter->getPage() - 1) * $itemsPerPage);
+        }
+
+        return $query->getQuery()->execute();
     }
-    */
+
+    protected function findByFiltersQB(?HttpLogFilter $filter = null): QueryBuilder
+    {
+        $queryBuilder = $this->createQueryBuilder('hl');
+        if ($filter && $ip = $filter->getIp()) {
+            $queryBuilder
+                ->andWhere('hl.ip = :ip')
+                ->setParameter('ip', $ip);
+        }
+
+        return $queryBuilder;
+    }
 }

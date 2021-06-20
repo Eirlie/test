@@ -36,9 +36,9 @@ class HttpLog
     private $request;
 
     /**
-     * @ORM\Column(name="request_headers", type="array")
+     * @ORM\Column(name="request_headers", type="text", nullable=true)
      */
-    private $requestHeaders = [];
+    private $requestHeaders;
 
     /**
      * @ORM\Column(type="text", nullable=true)
@@ -46,12 +46,12 @@ class HttpLog
     private $response;
 
     /**
-     * @ORM\Column(name="response_headers", type="array")
+     * @ORM\Column(name="response_headers", type="text", nullable=true)
      */
-    private $responseHeaders = [];
+    private $responseHeaders;
 
     /**
-     * @ORM\Column(type="smallint")
+     * @ORM\Column(type="smallint", nullable=true)
      */
     private $statusCode;
 
@@ -121,12 +121,12 @@ class HttpLog
         return $this;
     }
 
-    public function getRequestHeaders(): array
+    public function getRequestHeaders(): ?string
     {
         return $this->requestHeaders;
     }
 
-    public function setRequestHeaders(array $requestHeaders): self
+    public function setRequestHeaders(?string $requestHeaders): self
     {
         $this->requestHeaders = $requestHeaders;
 
@@ -144,12 +144,12 @@ class HttpLog
         return $this;
     }
 
-    public function getResponseHeaders(): array
+    public function getResponseHeaders(): ?string
     {
         return $this->responseHeaders;
     }
 
-    public function setResponseHeaders(array $responseHeaders): self
+    public function setResponseHeaders(?string $responseHeaders): self
     {
         $this->responseHeaders = $responseHeaders;
         return $this;

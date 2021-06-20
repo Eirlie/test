@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test http-log</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+            crossorigin="anonymous"></script>
+</head>
+<body>
+<div class="card justify-content-center">
+    <h1 class="card-title">HTTP-log</h1>
+    <div class="card-body">
+        <form action="{{ path('admin_http-log_list') }}" method="get" class="form form-horizontal row">
+            <div class="input-group">
+                <span id="filter__ip__title" class="input-group-text">Отфильтровать по IP</span>
+                <input aria-labelledby="filter__ip__title" type="text" name="ip" class="form-control form-control-sm"
+                       value="{{ filters.getIp() }}">
+                <button type="submit" class="btn btn-outline-secondary">Отфильтровать</button>
+            </div>
+        </form>
+        <table class="table table-striped table-hover">
+            <thead>
+            <tr class="row">
+                <td class="col-md-2">URL</td>
+                <td class="col-md-3">Запрос</td>
+                <td class="col-md-3">Ответ</td>
+                <td class="col-md-1">Http status code</td>
+                <td class="col-md-1">IP клиента</td>
+                <td class="col-md-2">Дата и время</td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for record in list.items %}
+                <tr class="row">
+                    <td class="col-md-2">{{ record.url }}</td>
+                    <td class="col-md-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#request-body__{{ loop.index }}">Тело запроса
+                        </button>
+                        <div id="request-body__{{ loop.index }}" class="modal fade" tabindex="-1">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Тело запроса</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Закрыть"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>{{ record.request|e }} </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <p>{{ record.requestHeaders|nl2br }}</p>
+                    </td>
+                    <td class="col-md-3">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#response-body__{{ loop.index }}">Тело ответа
+                        </button>
+                        <div id="response-body__{{ loop.index }}" class="modal fade">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Тело ответа</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Закрыть"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>{{ record.response|e }} </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <p>{{ record.responseHeaders|nl2br }}</p>
+                    </td>
+                    <td class="col-md-1">{{ record.statusCode }}</td>
+                    <td class="col-md-1">{{ record.ip }}</td>
+                    <td class="col-md-2">{{ record.createdAt|date }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="d-flex justify-content-center">Не найдено</div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if list.count > 0 %}
+        <div class="card-footer">
+            <nav class="d-flex justify-content-center">
+                {% set pageCount = (list.count / filters.itemsPerPage)|round(0, 'ceil') %}
+                <ul class="pagination">
+                    {% for i in 1..pageCount %}
+                        <li class="page-item {% if i == filters.page %}active{% endif %}"><a class="page-link"
+                                                                                             href="{{ path('admin_http-log_list', {'ip': filters.ip, 'page': i, 'per_page': filters.itemsPerPage}) }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    {% endif %}
+</div>
+</body>
+</html>
