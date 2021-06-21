@@ -2,7 +2,6 @@ version: '3'
 
 services:
   app:
-    restart: always
     build:
       context: ./container/php
       dockerfile: Dockerfile
@@ -24,7 +23,6 @@ services:
       - ./var/log/php/:/var/log/
   nginx:
     image: nginx:alpine
-    restart: always
     depends_on:
       - app
     networks:
@@ -37,7 +35,6 @@ services:
       - ./var/log/:/var/log
   database:
     image: postgres:13-alpine
-    restart: always
     environment:
       POSTGRES_USER: 'app'
       POSTGRES_PASSWORD: 'INWAJ9jn0caTkdjmK118egYydjXZTBz4pmcdKJsrAwU='
